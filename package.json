@@ -10,7 +10,7 @@
     "url": "https://github.com/drblank/vscode-frappe-bench"
   },
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.120.0"
   },
   "categories": [
     "Other"
