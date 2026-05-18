@@ -1,0 +1,103 @@
+{
+  "name": "vscode-frappe-bench",
+  "displayName": "Frappe Bench Tools",
+  "description": "VS Code utilities for Frappe bench development: site picker, bench commands, task integration.",
+  "version": "0.1.0",
+  "publisher": "drblank",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drblank/vscode-frappe-bench"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "frappe",
+    "erpnext",
+    "bench",
+    "frappe-bench"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "frappeBench.pickSite",
+        "title": "Frappe Bench: Pick Site"
+      },
+      {
+        "command": "frappeBench.migrate",
+        "title": "Frappe Bench: Migrate"
+      },
+      {
+        "command": "frappeBench.clearCache",
+        "title": "Frappe Bench: Clear Cache"
+      },
+      {
+        "command": "frappeBench.migrateAndClearCache",
+        "title": "Frappe Bench: Migrate + Clear Cache"
+      },
+      {
+        "command": "frappeBench.build",
+        "title": "Frappe Bench: Build Assets"
+      },
+      {
+        "command": "frappeBench.console",
+        "title": "Frappe Bench: Console"
+      },
+      {
+        "command": "frappeBench.restart",
+        "title": "Frappe Bench: Restart"
+      },
+      {
+        "command": "frappeBench.update",
+        "title": "Frappe Bench: Update (--reset --no-backup)"
+      },
+      {
+        "command": "frappeBench.stopWeb",
+        "title": "Frappe Bench: Stop Web Worker"
+      },
+      {
+        "command": "frappeBench.startWeb",
+        "title": "Frappe Bench: Start Web Worker"
+      },
+      {
+        "command": "frappeBench.execute",
+        "title": "Frappe Bench: Execute Python Snippet"
+      }
+    ],
+    "configuration": {
+      "title": "Frappe Bench Tools",
+      "properties": {
+        "frappeBench.benchRoot": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to your `frappe-bench` root. Leave empty to auto-detect from the workspace folder (walks up looking for `sites/`, `apps/`, `env/`), then falls back to `~/frappe-bench`."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "@types/vscode": "^1.120.0",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.4.0",
+    "npm-run-all2": "^8.0.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.3"
+  }
+}

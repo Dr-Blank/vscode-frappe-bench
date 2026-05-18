@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch"
+        },
+        {
+            "label": "Release: Bump Version",
+            "type": "shell",
+            "command": "npm version ${input:bumpType} --message 'chore(release): bump v%s' && git push --follow-tags",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "bumpType",
+            "type": "pickString",
+            "description": "Version bump type",
+            "options": ["patch", "minor", "major"],
+            "default": "patch"
+        }
+    ]
+}
