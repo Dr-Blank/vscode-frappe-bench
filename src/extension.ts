@@ -142,12 +142,22 @@ async function pickApp(): Promise<string> {
         return apps[0];
     }
 
-    const picked = await vscode.window.showQuickPick(apps, {
+    const lastApp = _context?.workspaceState.get<string>(LAST_APP_KEY);
+    const items: vscode.QuickPickItem[] = [
+        ...apps.filter(a => a === lastApp),
+        ...apps.filter(a => a !== lastApp),
+    ].map(a => ({ label: a }));
+
+    const picked = await vscode.window.showQuickPick(items, {
         placeHolder: 'Select Frappe app',
         ignoreFocusOut: true,
     });
 
-    return picked ?? '';
+    if (picked) {
+        await _context?.workspaceState.update(LAST_APP_KEY, picked.label);
+    }
+
+    return picked?.label ?? '';
 }
 
 // ── Site picker (used as task input provider) ─────────────────────────────────
@@ -176,12 +186,22 @@ async function pickSite(): Promise<string> {
         return sites[0];
     }
 
-    const picked = await vscode.window.showQuickPick(sites, {
+    const lastSite = _context?.workspaceState.get<string>(LAST_SITE_KEY);
+    const items: vscode.QuickPickItem[] = [
+        ...sites.filter(s => s === lastSite),
+        ...sites.filter(s => s !== lastSite),
+    ].map(s => ({ label: s }));
+
+    const picked = await vscode.window.showQuickPick(items, {
         placeHolder: 'Select Frappe site',
         ignoreFocusOut: true,
     });
 
-    return picked ?? '';
+    if (picked) {
+        await _context?.workspaceState.update(LAST_SITE_KEY, picked.label);
+    }
+
+    return picked?.label ?? '';
 }
 
 // ── Task helpers ──────────────────────────────────────────────────────────────
@@ -230,7 +250,12 @@ async function runSiteTask(
 
 // ── Command registrations ─────────────────────────────────────────────────────
 
+let _context: vscode.ExtensionContext | undefined;
+const LAST_SITE_KEY = 'frappeBench.lastPickedSite';
+const LAST_APP_KEY = 'frappeBench.lastPickedApp';
+
 export function activate(context: vscode.ExtensionContext): void {
+    _context = context;
     const bench = getBenchRoot;
 
     context.subscriptions.push(
