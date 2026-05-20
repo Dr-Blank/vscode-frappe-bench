@@ -69,6 +69,67 @@ function findSites(benchRoot: string): string[] {
         .sort();
 }
 
+// ── App discovery ─────────────────────────────────────────────────────────────
+
+function findApps(benchRoot: string): string[] {
+    const appsDir = path.join(benchRoot, 'apps');
+    return fs.readdirSync(appsDir)
+        .filter((name: string) => {
+            try {
+                return fs.statSync(path.join(appsDir, name)).isDirectory();
+            } catch {
+                return false;
+            }
+        })
+        .sort();
+}
+
+// ── App picker (smart: auto-detects if workspace is inside bench/apps/<app>) ──
+
+async function pickApp(): Promise<string> {
+    const benchRoot = getBenchRoot();
+    const appsDir = path.join(benchRoot, 'apps');
+
+    const folders = vscode.workspace.workspaceFolders;
+    if (folders) {
+        for (const folder of folders) {
+            const rel = path.relative(appsDir, folder.uri.fsPath);
+            if (!rel.startsWith('..') && !path.isAbsolute(rel)) {
+                const appName = rel.split(path.sep)[0];
+                if (appName && !appName.startsWith('.')) {
+                    return appName;
+                }
+            }
+        }
+    }
+
+    let apps: string[];
+    try {
+        apps = findApps(benchRoot);
+    } catch (err) {
+        vscode.window.showErrorMessage(
+            `Frappe Bench: cannot read apps from ${appsDir}: ${(err as Error).message}`
+        );
+        return '';
+    }
+
+    if (apps.length === 0) {
+        vscode.window.showErrorMessage(`Frappe Bench: no apps found in ${appsDir}`);
+        return '';
+    }
+
+    if (apps.length === 1) {
+        return apps[0];
+    }
+
+    const picked = await vscode.window.showQuickPick(apps, {
+        placeHolder: 'Select Frappe app',
+        ignoreFocusOut: true,
+    });
+
+    return picked ?? '';
+}
+
 // ── Site picker (used as task input provider) ─────────────────────────────────
 
 async function pickSite(): Promise<string> {
@@ -179,6 +240,34 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('frappeBench.build', () =>
             runTask('bench: build', 'bench build', bench())
         ),
+
+        // ── bench build --app <app> ─────────────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.buildApp', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: build app', `bench build --app ${app}`, bench());
+        }),
+
+        // ── bench --site <site> export-fixtures ─────────────────────────────
+        vscode.commands.registerCommand('frappeBench.exportFixtures', () =>
+            runSiteTask('bench: export fixtures',
+                site => `bench --site ${site} export-fixtures`,
+                { focus: true, clear: true }
+            )
+        ),
+
+        // ── bench --site <site> export-fixtures --app <app> ────────────────
+        vscode.commands.registerCommand('frappeBench.exportFixturesApp', async () => {
+            const site = await pickSite();
+            if (!site) { return; }
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: export fixtures (app)',
+                `bench --site ${site} export-fixtures --app ${app}`,
+                bench(),
+                { focus: true, clear: true }
+            );
+        }),
 
         // ── bench console ───────────────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.console', () =>

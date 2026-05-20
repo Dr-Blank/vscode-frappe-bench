@@ -79,6 +79,18 @@
       {
         "command": "frappeBench.execute",
         "title": "Frappe Bench: Execute Python Snippet"
+      },
+      {
+        "command": "frappeBench.buildApp",
+        "title": "Frappe Bench: Build Assets (App)"
+      },
+      {
+        "command": "frappeBench.exportFixtures",
+        "title": "Frappe Bench: Export Fixtures"
+      },
+      {
+        "command": "frappeBench.exportFixturesApp",
+        "title": "Frappe Bench: Export Fixtures (App)"
       }
     ],
     "configuration": {
