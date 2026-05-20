@@ -92,6 +92,10 @@
       {
         "command": "frappeBench.exportFixturesApp",
         "title": "Frappe Bench: Export Fixtures (App)"
+      },
+      {
+        "command": "frappeBench.setAdminPassword",
+        "title": "Frappe Bench: Set Admin Password"
       }
     ],
     "configuration": {

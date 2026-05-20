@@ -349,6 +349,47 @@ export function activate(context: vscode.ExtensionContext): void {
             )
         ),
 
+        // ── bench --site <site> set-admin-password ──────────────────────────
+        vscode.commands.registerCommand('frappeBench.setAdminPassword', async () => {
+            const site = await pickSite();
+            if (!site) { return; }
+            const password = await vscode.window.showInputBox({
+                prompt: `New administrator password for ${site}`,
+                placeHolder: 'Enter new password',
+                password: true,
+                ignoreFocusOut: true,
+            });
+            if (!password) { return; }
+            const confirm = await vscode.window.showInputBox({
+                prompt: 'Confirm new administrator password',
+                placeHolder: 'Re-enter password',
+                password: true,
+                ignoreFocusOut: true,
+            });
+            if (!confirm) { return; }
+            if (password !== confirm) {
+                vscode.window.showErrorMessage('Frappe Bench: passwords do not match');
+                return;
+            }
+            const task = new vscode.Task(
+                { type: 'frappe-bench' },
+                vscode.TaskScope.Workspace,
+                'bench: set-admin-password',
+                'Frappe Bench',
+                new vscode.ShellExecution(
+                    benchSiteCmd(site, 'set-admin-password', '$FRAPPE_ADMIN_PW'),
+                    { cwd: bench(), env: { FRAPPE_ADMIN_PW: password } }
+                )
+            );
+            task.presentationOptions = {
+                reveal: vscode.TaskRevealKind.Silent,
+                panel: vscode.TaskPanelKind.Dedicated,
+                focus: false,
+                clear: false,
+            };
+            vscode.tasks.executeTask(task);
+        }),
+
         // ── bench --site <site> execute (ad-hoc python snippet) ────────────
         vscode.commands.registerCommand('frappeBench.execute', async () => {
             const site = await pickSite();
