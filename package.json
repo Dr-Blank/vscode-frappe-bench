@@ -2,7 +2,7 @@
   "name": "vscode-frappe-bench",
   "displayName": "Frappe Bench Utilities",
   "description": "VS Code utilities for Frappe bench development: site picker, bench commands, task integration.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "drblank",
   "license": "MIT",
   "repository": {
