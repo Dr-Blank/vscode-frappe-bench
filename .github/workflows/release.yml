@@ -33,6 +33,12 @@ jobs:
         id: vsix
         run: echo "file=$(ls *.vsix)" >> "$GITHUB_OUTPUT"
 
+      - name: Publish to VS Code Marketplace
+        run: npx @vscode/vsce publish --packagePath ${{ steps.vsix.outputs.file }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        continue-on-error: true
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
