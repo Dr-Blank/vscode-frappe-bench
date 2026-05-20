@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- VS Code Squircle Background (Frappe Cod Gray) -->
+  <rect width="256" height="256" rx="56" fill="#171717" />
+  
+  <!-- Continuous Minimalist Bench Logo -->
+  <path d="M 44 44
+           L 164 44
+           A 48 48 0 0 1 212 92
+           L 212 164
+           A 48 48 0 0 1 164 212
+           L 92 212
+           A 48 48 0 0 1 44 164
+           L 44 152
+           L 100 128
+           L 44 104"
+        stroke="#FFFFFF" 
+        stroke-width="32" 
+        fill="none" 
+        stroke-linecap="butt" 
+        stroke-linejoin="round" />
+</svg>

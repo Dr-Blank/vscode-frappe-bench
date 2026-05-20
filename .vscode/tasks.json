@@ -12,6 +12,17 @@
             "problemMatcher": "$tsc-watch"
         },
         {
+            "label": "Assets: SVG to PNG",
+            "type": "shell",
+            "command": "npx --yes sharp-cli -i assets/logo.svg -o assets/logo.png resize 128 128",
+            "group": "none",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Release: Bump Version",
             "type": "shell",
             "command": "npm version ${input:bumpType} --message 'chore(release): bump v%s' && git push --follow-tags",
