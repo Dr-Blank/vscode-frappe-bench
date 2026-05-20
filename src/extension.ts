@@ -103,25 +103,48 @@ async function pickSite(): Promise<string> {
     return picked ?? '';
 }
 
-// ── Terminal helpers ──────────────────────────────────────────────────────────
+// ── Task helpers ──────────────────────────────────────────────────────────────
 
-function runInTerminal(name: string, command: string, cwd?: string): void {
-    const terminal = vscode.window.createTerminal({
-        name,
-        cwd: cwd ?? getBenchRoot(),
-    });
-    terminal.show(false);
-    terminal.sendText(command);
+interface TaskOptions {
+    panel?: vscode.TaskPanelKind;
+    focus?: boolean;
+    clear?: boolean;
 }
 
-async function runSiteCommand(
-    terminalName: string,
+function makeTask(
+    name: string,
+    command: string,
+    cwd: string,
+    opts: TaskOptions = {}
+): vscode.Task {
+    const {
+        panel = vscode.TaskPanelKind.Dedicated,
+        focus = false,
+        clear = false,
+    } = opts;
+    const task = new vscode.Task(
+        { type: 'frappe-bench' },
+        vscode.TaskScope.Workspace,
+        name,
+        'Frappe Bench',
+        new vscode.ShellExecution(command, { cwd })
+    );
+    task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, panel, focus, clear };
+    return task;
+}
+
+function runTask(name: string, command: string, cwd: string, opts: TaskOptions = {}): void {
+    vscode.tasks.executeTask(makeTask(name, command, cwd, opts));
+}
+
+async function runSiteTask(
+    taskName: string,
     buildCommand: (site: string) => string,
-    cwd?: string
+    opts: TaskOptions = {}
 ): Promise<void> {
     const site = await pickSite();
     if (!site) { return; }
-    runInTerminal(terminalName, buildCommand(site), cwd ?? getBenchRoot());
+    runTask(taskName, buildCommand(site), getBenchRoot(), opts);
 }
 
 // ── Command registrations ─────────────────────────────────────────────────────
@@ -136,62 +159,59 @@ export function activate(context: vscode.ExtensionContext): void {
 
         // ── bench migrate ───────────────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.migrate', () =>
-            runSiteCommand('bench: migrate', site =>
-                `bench --site ${site} migrate`
-            )
+            runSiteTask('bench: migrate', site => `bench --site ${site} migrate`, { focus: true, clear: true })
         ),
 
         // ── bench clear-cache ───────────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.clearCache', () =>
-            runSiteCommand('bench: clear-cache', site =>
-                `bench --site ${site} clear-cache`
-            )
+            runSiteTask('bench: clear-cache', site => `bench --site ${site} clear-cache`, { focus: true, clear: true })
         ),
 
         // ── bench migrate + clear-cache ─────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.migrateAndClearCache', () =>
-            runSiteCommand('bench: migrate + clear-cache', site =>
-                `bench --site ${site} migrate && bench --site ${site} clear-cache`
+            runSiteTask('bench: migrate + clear-cache', site =>
+                `bench --site ${site} migrate && bench --site ${site} clear-cache`,
+                { focus: true, clear: true }
             )
         ),
 
         // ── bench build (all apps) ──────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.build', () =>
-            runInTerminal('bench: build', 'bench build', bench())
+            runTask('bench: build', 'bench build', bench())
         ),
 
         // ── bench console ───────────────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.console', () =>
-            runSiteCommand('bench: console', site =>
-                `bench --site ${site} console`
-            )
+            runSiteTask('bench: console', site => `bench --site ${site} console`, { panel: vscode.TaskPanelKind.New })
         ),
 
         // ── bench restart ───────────────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.restart', () =>
-            runInTerminal('bench: restart', 'bench restart', bench())
+            runTask('bench: restart', 'bench restart', bench())
         ),
 
         // ── bench update --reset --no-backup ────────────────────────────────
         vscode.commands.registerCommand('frappeBench.update', () =>
-            runInTerminal('bench: update', 'bench update --reset --no-backup', bench())
+            runTask('bench: update', 'bench update --reset --no-backup', bench())
         ),
 
         // ── supervisorctl: stop web ─────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.stopWeb', () =>
-            runInTerminal(
+            runTask(
                 'bench: stop web',
                 'sudo supervisorctl stop frappe-bench-web:frappe-bench-frappe-web',
-                bench()
+                bench(),
+                { panel: vscode.TaskPanelKind.Shared }
             )
         ),
 
         // ── supervisorctl: start web ────────────────────────────────────────
         vscode.commands.registerCommand('frappeBench.startWeb', () =>
-            runInTerminal(
+            runTask(
                 'bench: start web',
                 'sudo supervisorctl start frappe-bench-web:frappe-bench-frappe-web',
-                bench()
+                bench(),
+                { panel: vscode.TaskPanelKind.Shared }
             )
         ),
 
@@ -205,10 +225,11 @@ export function activate(context: vscode.ExtensionContext): void {
                 ignoreFocusOut: true,
             });
             if (!snippet) { return; }
-            runInTerminal(
+            runTask(
                 'bench: execute',
                 `bench --site ${site} execute --args '${snippet.replace(/'/g, "'\\''")}'`,
-                bench()
+                bench(),
+                { panel: vscode.TaskPanelKind.New }
             );
         }),
     );
