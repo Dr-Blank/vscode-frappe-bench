@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/drblank/vscode-frappe-bench"
+    "url": "https://github.com/dr-blank/vscode-frappe-bench"
   },
   "engines": {
     "vscode": "^1.120.0"
