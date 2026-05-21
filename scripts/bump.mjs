@@ -59,7 +59,7 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
 
   execSync('git add package.json', { stdio: 'inherit' });
   execSync(`git commit -m "chore(release): bump v${newVersion}"`, { stdio: 'inherit' });
-  execSync(`git tag v${newVersion}`, { stdio: 'inherit' });
+  execSync(`git tag -a v${newVersion} -m "v${newVersion}"`, { stdio: 'inherit' });
   execSync('git push --follow-tags', { stdio: 'inherit' });
   console.log(`\nTagged and pushed v${newVersion}`);
 }
