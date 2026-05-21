@@ -25,11 +25,12 @@
         {
             "label": "Release: Bump Version",
             "type": "shell",
-            "command": "npm version ${input:bumpType} --message 'chore(release): bump v%s' && git push --follow-tags",
+            "command": "node scripts/bump.mjs --type=${input:releaseType} --bump=${input:bumpType}",
             "group": "none",
             "presentation": {
                 "reveal": "always",
-                "panel": "dedicated"
+                "panel": "dedicated",
+                "focus": true
             },
             "problemMatcher": []
         }
@@ -41,6 +42,13 @@
             "description": "Version bump type",
             "options": ["patch", "minor", "major"],
             "default": "patch"
+        },
+        {
+            "id": "releaseType",
+            "type": "pickString",
+            "description": "Release type (pre-release = odd minor, release = even minor)",
+            "options": ["pre-release", "release"],
+            "default": "pre-release"
         }
     ]
 }
