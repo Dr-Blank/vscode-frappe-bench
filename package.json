@@ -96,6 +96,14 @@
       {
         "command": "frappeBench.setAdminPassword",
         "title": "Frappe Bench: Set Admin Password"
+      },
+      {
+        "command": "frappeBench.setupRequirements",
+        "title": "Frappe Bench: Setup Requirements (App)"
+      },
+      {
+        "command": "frappeBench.setupRequirementsDev",
+        "title": "Frappe Bench: Setup Requirements --dev (App)"
       }
     ],
     "configuration": {

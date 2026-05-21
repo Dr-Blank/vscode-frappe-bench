@@ -390,6 +390,20 @@ export function activate(context: vscode.ExtensionContext): void {
             vscode.tasks.executeTask(task);
         }),
 
+        // ── bench setup requirements <app> ─────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.setupRequirements', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: setup requirements', benchCmd('setup', 'requirements', app), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench setup requirements --dev <app> ───────────────────────────
+        vscode.commands.registerCommand('frappeBench.setupRequirementsDev', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: setup requirements --dev', benchCmd('setup', 'requirements', '--dev', app), bench(), { focus: true, clear: true });
+        }),
+
         // ── bench --site <site> execute (ad-hoc python snippet) ────────────
         vscode.commands.registerCommand('frappeBench.execute', async () => {
             const site = await pickSite();
