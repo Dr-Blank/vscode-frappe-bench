@@ -2,7 +2,7 @@
   "name": "vscode-frappe-bench",
   "displayName": "Frappe Bench Utilities",
   "description": "VS Code utilities for Frappe bench development: site picker, bench commands, task integration.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "publisher": "drblank",
   "icon": "assets/logo.png",
   "license": "MIT",
@@ -104,6 +104,38 @@
       {
         "command": "frappeBench.setupRequirementsDev",
         "title": "Frappe Bench: Setup Requirements --dev (App)"
+      },
+      {
+        "command": "frappeBench.getApp",
+        "title": "Frappe Bench: Get App (git URL)"
+      },
+      {
+        "command": "frappeBench.installApp",
+        "title": "Frappe Bench: Install App on Site"
+      },
+      {
+        "command": "frappeBench.listApps",
+        "title": "Frappe Bench: List Apps on Site"
+      },
+      {
+        "command": "frappeBench.removeApp",
+        "title": "Frappe Bench: Remove App"
+      },
+      {
+        "command": "frappeBench.newApp",
+        "title": "Frappe Bench: New App"
+      },
+      {
+        "command": "frappeBench.excludeApp",
+        "title": "Frappe Bench: Exclude App from Updates"
+      },
+      {
+        "command": "frappeBench.includeApp",
+        "title": "Frappe Bench: Include App in Updates"
+      },
+      {
+        "command": "frappeBench.uninstallApp",
+        "title": "Frappe Bench: Uninstall App from Site"
       }
     ],
     "configuration": {
