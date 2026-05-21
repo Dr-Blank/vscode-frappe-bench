@@ -26,15 +26,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Detect release type
+        id: release_type
+        run: |
+          MINOR=$(node -p "require('./package.json').version.split('.')[1]")
+          if [ $((MINOR % 2)) -ne 0 ]; then
+            echo "pre_release=true" >> "$GITHUB_OUTPUT"
+            echo "vsce_flags=--pre-release" >> "$GITHUB_OUTPUT"
+          else
+            echo "pre_release=false" >> "$GITHUB_OUTPUT"
+            echo "vsce_flags=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Package extension
-        run: npx @vscode/vsce package
+        run: npx @vscode/vsce package ${{ steps.release_type.outputs.vsce_flags }}
 
       - name: Get VSIX filename
         id: vsix
         run: echo "file=$(ls *.vsix)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to VS Code Marketplace
-        run: npx @vscode/vsce publish --packagePath ${{ steps.vsix.outputs.file }}
+        run: npx @vscode/vsce publish ${{ steps.release_type.outputs.vsce_flags }} --packagePath ${{ steps.vsix.outputs.file }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         continue-on-error: true
@@ -43,5 +55,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.vsix.outputs.file }}
+          prerelease: ${{ steps.release_type.outputs.pre_release }}
           generate_release_notes: true
 
