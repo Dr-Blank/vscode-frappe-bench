@@ -160,6 +160,28 @@ async function pickApp(): Promise<string> {
     return picked?.label ?? '';
 }
 
+async function pickApps(): Promise<string[]> {
+    const benchRoot = getBenchRoot();
+    let apps: string[];
+    try {
+        apps = findApps(benchRoot);
+    } catch (err) {
+        vscode.window.showErrorMessage(
+            `Frappe Bench: cannot read apps from ${benchRoot}/apps: ${(err as Error).message}`
+        );
+        return [];
+    }
+    if (apps.length === 0) {
+        vscode.window.showErrorMessage(`Frappe Bench: no apps found in ${benchRoot}/apps`);
+        return [];
+    }
+    const picked = await vscode.window.showQuickPick(
+        apps.map(a => ({ label: a })),
+        { placeHolder: 'Select apps', canPickMany: true, ignoreFocusOut: true }
+    );
+    return picked ? picked.map(p => p.label) : [];
+}
+
 // ── Site picker (used as task input provider) ─────────────────────────────────
 
 async function pickSite(): Promise<string> {
@@ -403,6 +425,80 @@ export function activate(context: vscode.ExtensionContext): void {
             if (!app) { return; }
             runTask('bench: setup requirements --dev', benchCmd('setup', 'requirements', '--dev', app), bench(), { focus: true, clear: true });
         }),
+
+        // ── bench get-app <git-url> [--branch <branch>] ────────────────────
+        vscode.commands.registerCommand('frappeBench.getApp', async () => {
+            const gitUrl = await vscode.window.showInputBox({
+                prompt: 'Git URL of the Frappe app to fetch',
+                placeHolder: 'https://github.com/frappe/erpnext',
+                ignoreFocusOut: true,
+            });
+            if (!gitUrl) { return; }
+            const branch = await vscode.window.showInputBox({
+                prompt: 'Branch to checkout (leave empty for default)',
+                placeHolder: 'develop',
+                ignoreFocusOut: true,
+            });
+            const cmd = branch
+                ? benchCmd('get-app', '--branch', branch, gitUrl)
+                : benchCmd('get-app', gitUrl);
+            runTask('bench: get-app', cmd, bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench --site <site> install-app <app>... ───────────────────────
+        vscode.commands.registerCommand('frappeBench.installApp', async () => {
+            const site = await pickSite();
+            if (!site) { return; }
+            const apps = await pickApps();
+            if (apps.length === 0) { return; }
+            runTask('bench: install-app', benchSiteCmd(site, 'install-app', ...apps), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench remove-app <app> ─────────────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.removeApp', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: remove-app', benchCmd('remove-app', app), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench new-app <name> ───────────────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.newApp', async () => {
+            const name = await vscode.window.showInputBox({
+                prompt: 'Name for the new Frappe app',
+                placeHolder: 'my_app',
+                ignoreFocusOut: true,
+            });
+            if (!name) { return; }
+            runTask('bench: new-app', benchCmd('new-app', name), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench exclude-app <app> ────────────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.excludeApp', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: exclude-app', benchCmd('exclude-app', app), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench include-app <app> ────────────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.includeApp', async () => {
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: include-app', benchCmd('include-app', app), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench --site <site> uninstall-app <app> ────────────────────────
+        vscode.commands.registerCommand('frappeBench.uninstallApp', async () => {
+            const site = await pickSite();
+            if (!site) { return; }
+            const app = await pickApp();
+            if (!app) { return; }
+            runTask('bench: uninstall-app', benchSiteCmd(site, 'uninstall-app', app), bench(), { focus: true, clear: true });
+        }),
+
+        // ── bench --site <site> list-apps ──────────────────────────────────
+        vscode.commands.registerCommand('frappeBench.listApps', () =>
+            runSiteTask('bench: list-apps', site => benchSiteCmd(site, 'list-apps'), { focus: true, clear: true })
+        ),
 
         // ── bench --site <site> execute (ad-hoc python snippet) ────────────
         vscode.commands.registerCommand('frappeBench.execute', async () => {
